@@ -1,12 +1,5 @@
 import { getNotionData, parseNotionProperty } from './notion';
 
-// 메인 배너 (일단 하드코딩 유지)
-export const mainBanners = [
-  { id: 1, title: '비버 신상품 출시', bgColor: '#FFE5B4' },
-  { id: 2, title: '팝업스토어 오픈', bgColor: '#E5F3FF' },
-  { id: 3, title: '특가 이벤트 진행중', bgColor: '#FFE5E5' },
-];
-
 // 진행중 팝업 (일단 하드코딩 유지 - 나중에 별도 DB 만들면 수정)
 export const popupStores = [
   { id: 1, title: '홍대 팝업스토어', date: '2026.02.01 - 02.28', bgColor: '#F5F5F5' },
