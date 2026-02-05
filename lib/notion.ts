@@ -180,18 +180,18 @@ export function convertNotionToPopup(notionPage: any): PopupStore {
   const properties = notionPage.properties;
 
   // Description을 배열로 변환 (줄바꿈 기준으로 분리)
-  const descriptionText = parseNotionProperty(properties.Description) || '';
+  const descriptionText = parseNotionProperty(properties.description) || ''; // Description → description
   const descriptionArray = descriptionText.split('\n').filter((line: string) => line.trim());
 
   return {
     id: notionPage.id,
-    title: parseNotionProperty(properties.Title) || '제목 없음',
-    date: parseNotionProperty(properties.Date) || '',
-    time: parseNotionProperty(properties.Time) || '',
-    location: parseNotionProperty(properties.Location) || '',
+    title: parseNotionProperty(properties.Title) || '제목 없음', // Title은 대문자 그대로
+    date: parseNotionProperty(properties.date) || '', // Date → date
+    time: parseNotionProperty(properties.time) || '', // Time → time
+    location: parseNotionProperty(properties.location) || '', // Location → location
     description: descriptionArray,
-    bgColor: parseNotionProperty(properties.BgColor) || '#F5F5F5',
-    image: parseNotionProperty(properties.Image) || '',
+    bgColor: parseNotionProperty(properties.bgColor) || '#F5F5F5', // BgColor → bgColor
+    image: parseNotionProperty(properties.image) || '', // Image → image
   };
 }
 
@@ -231,9 +231,13 @@ export async function getPopupData() {
   }
 }
 
-// 모든 팝업스토어 가져오기
 export async function getAllPopups(): Promise<PopupStore[]> {
   const notionData = await getPopupData();
+  
+  // 디버깅: raw 데이터 확인
+  console.log('=== Raw Notion Data ===');
+  console.log(JSON.stringify(notionData[0], null, 2));
+  
   return notionData.map(convertNotionToPopup);
 }
 

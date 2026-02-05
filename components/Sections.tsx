@@ -5,6 +5,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { popupStores, allProducts } from '../lib/data';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface HomeSectionProps {
   visibleSections: Set<string>;
@@ -111,7 +112,7 @@ export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) 
         }`}
       >
         <div className="max-w-3xl mx-auto px-4 mb-3 md:mb-4">
-          <h2 className="text-lg md:text-xl font-display font-bold">Event</h2>
+          <h2 className="text-lg md:text-xl font-display font-bold">Popup</h2>
         </div>
         <div className="max-w-3xl mx-auto">
           <Swiper 
@@ -127,13 +128,55 @@ export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) 
           >
             {popups.map((popup) => (
               <SwiperSlide key={popup.id}>
-                <div
-                  className="h-32 md:h-36 rounded-lg p-4 md:p-5 flex flex-col justify-between transition-transform duration-300"
-                  style={{ backgroundColor: popup.bgColor }}
-                >
-                  <h3 className="font-display font-bold text-base md:text-lg">{popup.title}</h3>
-                  <p className="text-sm md:text-base text-gray-600">{popup.date}</p>
-                </div>
+                <Link href={`/popup`}>
+                  <div
+                    className="relative h-80 md:h-96 rounded-lg overflow-hidden group cursor-pointer transition-transform duration-300"
+                  >
+                    {/* 배경 이미지 */}
+                    {popup.image ? (
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                        style={{ 
+                          backgroundImage: `url(${popup.image})`,
+                        }}
+                      />
+                    ) : (
+                      <div 
+                        className="absolute inset-0"
+                        style={{ backgroundColor: popup.bgColor }}
+                      />
+                    )}
+                    
+                    {/* 그라데이션 오버레이 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    
+                    {/* 텍스트 컨텐츠 */}
+                    <div className="absolute inset-0 p-5 md:p-6 flex flex-col justify-end text-white">
+                      <h3 className="font-display font-bold text-xl md:text-2xl mb-2">
+                        {popup.title}
+                      </h3>
+                      
+                      <div className="space-y-1 text-sm md:text-base text-white/90">
+                        {popup.date && (
+                          <p className="flex items-center gap-1.5">
+                            {popup.date}<br/>{popup.time}
+                          </p>
+                        )}
+                        {popup.location && (
+                          <p className="flex items-center gap-1.5">
+                            {popup.location}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {popup.description && popup.description.length > 0 && (
+                        <p className="mt-3 text-sm text-white/80 line-clamp-2">
+                          {popup.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Link>
               </SwiperSlide>
             ))}
           </Swiper>
@@ -168,13 +211,23 @@ export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) 
             {products.slice(0, 8).map((product) => (
               <SwiperSlide key={product.id}>
                 <Link href={`/goods/${product.id}`}>
-                  <div className="transition-transform duration-300 cursor-pointer">
+                  <div className="cursor-pointer">
                     <div
-                      className="aspect-square mb-2 rounded-lg"
-                      style={{ backgroundColor: product.bgColor }}
-                    ></div>
-                    <p className="text-sm md:text-base font-medium mb-1">{product.name}</p>
-                    <p className="text-sm md:text-base font-bold">{product.price.toLocaleString()}원</p>
+                      className="relative aspect-square mb-2 overflow-hidden border border-gray-100"
+                      style={{
+                        backgroundColor: product.bgColor,
+                        backgroundImage: product.image ? `url(${product.image})` : undefined,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    />
+
+                    <p className="text-sm md:text-base font-medium mb-1">
+                      {product.name}
+                    </p>
+                    <p className="text-sm md:text-base font-bold">
+                      {product.price.toLocaleString()}원
+                    </p>
                   </div>
                 </Link>
               </SwiperSlide>
@@ -300,80 +353,47 @@ export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) 
           }`}
         >
           <h3 className="text-lg md:text-xl font-display font-bold mb-4 md:mb-6">진행중 이벤트</h3>
-          <div className="space-y-6">
-            <div>
-              <div className="bg-gray-100 aspect-video mb-3 flex items-center justify-center rounded-lg">
-                <p className="text-gray-400 text-sm md:text-base">EVENT IMAGE 1</p>
+            {/* 이벤트 1 */}
+            <Link href="/events/test">
+              <div className="cursor-pointer">
+                <div className="relative aspect-video mb-3 rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src="/test.jpg"
+                    alt="비버 테스트"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h4 className="font-display font-bold mb-2 text-base md:text-lg">
+                  비버 테스트
+                </h4>
+                <p className="text-sm md:text-base text-gray-600">
+                  나는 어떤 비버일까?
+                </p>
               </div>
-              <h4 className="font-display font-bold mb-2 text-base md:text-lg">신상품 런칭 기념 이벤트</h4>
-              <p className="text-sm md:text-base text-gray-600">비버하우스 신상품 출시를 기념하여 특별한 혜택을 준비했습니다</p>
-            </div>
-            <div>
-              <div className="bg-gray-100 aspect-video mb-3 flex items-center justify-center rounded-lg">
-                <p className="text-gray-400 text-sm md:text-base">EVENT IMAGE 2</p>
+            </Link>
+
+            {/* 이벤트 2 */}
+            <Link href="/events/follow">
+              <div className="cursor-pointer">
+                <div className="relative aspect-video mb-3 rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src="/follow.jpg"
+                    alt="홍대 팝업스토어 오픈"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h4 className="font-display font-bold mb-2 text-base md:text-lg">
+                  비버하우스 팔로우 이벤트
+                </h4>
+                <p className="text-sm md:text-base text-gray-600">
+                  공식 인스타그램 팔로우하고 기프티콘 받아가기
+                </p>
               </div>
-              <h4 className="font-display font-bold mb-2 text-base md:text-lg">홍대 팝업스토어 오픈</h4>
-              <p className="text-sm md:text-base text-gray-600">2월 한 달간 홍대에서 비버하우스를 만나보세요</p>
-            </div>
-          </div>
+            </Link>
         </div>
       </section>
     </>
-  );
-}
-
-export function GoodsSection() {
-  return (
-    <section className="px-4 pt-4 max-w-3xl mx-auto">
-      <h2 className="text-xl md:text-2xl font-display font-bold mb-4 md:mb-6">전체 굿즈</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {allProducts.map((product) => (
-          <div key={product.id} className="transition-transform duration-300 cursor-pointer">
-            <div
-              className="aspect-square mb-2 rounded-lg"
-              style={{ backgroundColor: product.bgColor }}
-            ></div>
-            <p className="text-xs md:text-sm text-gray-500 mb-1">{product.category}</p>
-            <p className="text-sm md:text-base font-medium mb-1">{product.name}</p>
-            <p className="text-sm md:text-base font-bold">{product.price}원</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-export function PopupSection() {
-  return (
-    <section className="px-4 pt-4 max-w-3xl mx-auto">
-      <h2 className="text-xl md:text-2xl font-display font-bold mb-4 md:mb-6">팝업스토어</h2>
-      <div className="space-y-4">
-        {popupStores.map((popup) => (
-          <div
-            key={popup.id}
-            className="p-6 rounded-lg transition-transform duration-300"
-            style={{ backgroundColor: popup.bgColor }}
-          >
-            <h3 className="text-lg md:text-xl font-display font-bold mb-2">{popup.title}</h3>
-            <p className="text-sm md:text-base text-gray-600 mb-3">{popup.date}</p>
-            <p className="text-sm md:text-base">서울시 마포구 홍익로 123</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-export function MySection() {
-  return (
-    <section className="px-4 pt-4 max-w-2xl mx-auto">
-      <h2 className="text-xl md:text-2xl font-display font-bold mb-6 md:mb-8">마이페이지</h2>
-      <div className="space-y-4">
-        <button className="w-full text-left py-3 md:py-4 border-b text-sm md:text-base transition-colors">주문 내역</button>
-        <button className="w-full text-left py-3 md:py-4 border-b text-sm md:text-base transition-colors">배송 조회</button>
-        <button className="w-full text-left py-3 md:py-4 border-b text-sm md:text-base transition-colors">찜한 상품</button>
-        <button className="w-full text-left py-3 md:py-4 border-b text-sm md:text-base transition-colors">고객센터</button>
-      </div>
-    </section>
   );
 }

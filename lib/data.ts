@@ -2,13 +2,13 @@ import { getNotionData, parseNotionProperty } from './notion';
 
 // 진행중 팝업 (일단 하드코딩 유지 - 나중에 별도 DB 만들면 수정)
 export const popupStores = [
-  { id: 1, title: '홍대 팝업스토어', date: '2026.02.01 - 02.28', bgColor: '#F5F5F5' },
-  { id: 2, title: '강남 팝업스토어', date: '2026.03.01 - 03.31', bgColor: '#F0F0F0' },
+  { id: 1, title: '홍대 팝업스토어', date: '2026.02.01 - 02.28', location: '', time: '', description: '', bgColor: '#F5F5F5', image: '' },
+  { id: 2, title: '강남 팝업스토어', date: '2026.03.01 - 03.31', location: '', description: '', bgColor: '#F0F0F0' },
 ];
 
 // 하드코딩된 기존 데이터 (폴백용)
 export const allProducts = [
-  { id: 1, name: '비버 미니 피규어', price: '29,000', category: '피규어', bgColor: '#FFF8E1' },
+  { id: 1, name: '비버 미니 피규어', price: '29,000', category: '피규어', bgColor: '#FFF8E1', image: '', },
   { id: 2, name: '비버 에코백', price: '15,000', category: '패션', bgColor: '#E8F5E9' },
   { id: 3, name: '비버 노트', price: '8,000', category: '문구', bgColor: '#E3F2FD' },
   { id: 4, name: '비버 키링', price: '12,000', category: '악세서리', bgColor: '#FCE4EC' },

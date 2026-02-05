@@ -1,6 +1,6 @@
 {
   "name": "비버하우스",
-  "short_name": "Beaver House",
+  "short_name": "비버하우스",
   "description": "비버하우스 공식 스토어",
   "start_url": "/",
   "display": "standalone",
