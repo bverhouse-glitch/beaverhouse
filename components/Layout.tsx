@@ -15,9 +15,7 @@ export function Header() {
     { text: 'HOME', href: '/', delay: 0 },
     { text: 'SHOP', href: '/goods', delay: 100 },
     { text: 'POPUP STORE', href: '/popup', delay: 200 },
-    { text: 'ABOUT BEAVER', delay: 300 },
-    { text: 'NOTICE', delay: 400 },
-    { text: 'CONTACT', delay: 500 },
+    { text: 'MY BEAVER', href: '/my', delay: 300},
   ];
 
   return (
