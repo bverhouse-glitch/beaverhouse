@@ -60,14 +60,20 @@ export async function getLikes(userId: string) {
   return snapshot.docs.map(doc => doc.id); // productId 배열 반환
 }
 
-// 주문 생성 (모의)
+// 주문 생성 시 items 배열에 상품 정보도 같이 저장
 export async function createOrder(userId: string, items: any[], totalPrice: number) {
   const ordersRef = collection(db, 'users', userId, 'orders');
-  const orderDoc = doc(ordersRef); // 자동 ID 생성
+  const orderDoc = doc(ordersRef);
   
   await setDoc(orderDoc, {
     orderNumber: `ORD-${Date.now()}`,
-    items,
+    items: items.map(item => ({
+      productId: item.productId,
+      name: item.product?.name,
+      price: item.product?.price,
+      quantity: item.quantity,
+      image: item.product?.image,
+    })),
     totalPrice,
     status: 'pending',
     createdAt: serverTimestamp()

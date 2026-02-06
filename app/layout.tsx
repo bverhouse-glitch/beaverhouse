@@ -45,6 +45,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppLayout>{children}</AppLayout>
+
+        {/* 다음 우편번호 서비스 */}
+        <script 
+          src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          async
+        ></script>
       </body>
     </html>
   );

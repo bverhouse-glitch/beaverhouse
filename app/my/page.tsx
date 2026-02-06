@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { getCart, removeFromCart, getLikes, getOrders } from '@/lib/firestore';
+import { getCart, removeFromCart, getLikes, getOrders, createOrder } from '@/lib/firestore';
 
 // 배송지 타입
 interface ShippingAddress {
@@ -145,6 +145,18 @@ export default function MyPage() {
     setEditingShipping(false);
   };
 
+  const handleAddressSearch = () => {
+    new window.daum.Postcode({
+      oncomplete: (data) => {
+        setShippingInfo(prev => ({
+          ...prev,
+          zipcode: data.zonecode,
+          address: data.address,
+        }));
+      },
+    }).open();
+  };
+
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/my/login');
@@ -154,6 +166,47 @@ export default function MyPage() {
     if (!user) return;
     await removeFromCart(user.uid, productId);
     setCartItems(prev => prev.filter(item => item.productId !== productId));
+  };
+
+  const handleCheckout = async () => {
+    if (!user) {
+      alert('로그인이 필요합니다');
+      return;
+    }
+
+    if (!hasShippingInfo) {
+      alert('배송지를 먼저 등록해주세요');
+      setOpenSection('shipping');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert('장바구니가 비었습니다');
+      return;
+    }
+
+    if (!confirm(`${totalCartPrice.toLocaleString()}원을 주문하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      // 주문 생성
+      await createOrder(user.uid, cartItems, totalCartPrice);
+      
+      // 장바구니 비우기
+      for (const item of cartItems) {
+        await removeFromCart(user.uid, item.productId);
+      }
+      
+      setCartItems([]);
+      alert('주문이 완료되었습니다!');
+      
+      // 주문 내역 탭 열기
+      setOpenSection('orders');
+    } catch (error) {
+      console.error(error);
+      alert('주문 중 오류가 발생했습니다');
+    }
   };
 
   if (loading) {
@@ -267,7 +320,11 @@ export default function MyPage() {
                     placeholder="우편번호"
                     className="flex-1 border border-gray-200 rounded-lg px-4 py-3 text-sm"
                   />
-                  <button className="px-4 py-3 bg-gray-100 rounded-lg text-sm font-medium whitespace-nowrap">
+                  <button 
+                    type="button"
+                    onClick={handleAddressSearch}
+                    className="px-4 py-3 bg-gray-100 rounded-lg text-sm font-medium whitespace-nowrap"
+                  >
                     주소 검색
                   </button>
                 </div>
@@ -413,7 +470,10 @@ export default function MyPage() {
                     {totalCartPrice.toLocaleString()}원
                   </span>
                 </div>
-                <button className="w-full py-4 bg-gray-900 text-white rounded-xl font-semibold">
+                <button 
+                  onClick={handleCheckout}
+                  className="w-full py-4 bg-gray-900 text-white rounded-xl font-semibold"
+                >
                   주문하기
                 </button>
               </div>
