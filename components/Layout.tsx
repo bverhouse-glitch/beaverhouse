@@ -42,6 +42,7 @@ export function Header() {
               width={30}
               height={30}
               priority
+              className="h-6 md:h-7 w-auto"
             />
             <Image
               src="/logo-text.png"
@@ -49,6 +50,7 @@ export function Header() {
               width={129}
               height={40}
               priority
+              className="h-6 md:h-7 w-auto"
             />
           </div>
         </Link>

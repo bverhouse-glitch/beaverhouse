@@ -15,11 +15,14 @@ import {
   getOrders, 
   createOrder,
   getPoints,
-  addPoints 
+  addPoints,
+  cancelOrder,
+  addToCart
 } from '@/lib/firestore';
 
 import CheckoutModal from './CheckoutModal';
 import RewardAdButton from './RewardAdButton';
+import OrderDetailModal from './OrderDetailModal';
 
 // 배송지 타입
 interface ShippingAddress {
@@ -45,7 +48,15 @@ export default function MyPage() {
   const [likedProducts, setLikedProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
 
-  // 포인트 상태 (컴포넌트 내부로 이동)
+  // 선택 상태
+  const [selectedCartItems, setSelectedCartItems] = useState<string[]>([]);
+  const [selectedLikedProducts, setSelectedLikedProducts] = useState<string[]>([]);
+
+  // 주문 상세 모달
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
+  // 포인트 상태
   const [points, setPoints] = useState(0);
 
   // 배송지 정보
@@ -119,6 +130,7 @@ export default function MyPage() {
           })
         );
         setCartItems(items);
+        setSelectedCartItems(items.map(item => item.productId));
       }
 
       if (openSection === 'likes') {
@@ -134,6 +146,7 @@ export default function MyPage() {
           })
         );
         setLikedProducts(products.filter(Boolean));
+        setSelectedLikedProducts([]);
       }
 
       if (openSection === 'orders') {
@@ -186,6 +199,50 @@ export default function MyPage() {
     if (!user) return;
     await removeFromCart(user.uid, productId);
     setCartItems(prev => prev.filter(item => item.productId !== productId));
+    setSelectedCartItems(prev => prev.filter(id => id !== productId));
+  };
+
+  const handleToggleCartItem = (productId: string) => {
+    setSelectedCartItems(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleToggleAllCart = () => {
+    if (selectedCartItems.length === cartItems.length) {
+      setSelectedCartItems([]);
+    } else {
+      setSelectedCartItems(cartItems.map(item => item.productId));
+    }
+  };
+
+  const handleToggleLikedProduct = (productId: string) => {
+    setSelectedLikedProducts(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleAddSelectedLikesToCart = async () => {
+    if (!user) return;
+    if (selectedLikedProducts.length === 0) {
+      alert('상품을 선택해주세요');
+      return;
+    }
+
+    try {
+      for (const productId of selectedLikedProducts) {
+        await addToCart(user.uid, productId, 1);
+      }
+      alert(`${selectedLikedProducts.length}개 상품을 장바구니에 담았습니다`);
+      setSelectedLikedProducts([]);
+    } catch (error) {
+      console.error(error);
+      alert('장바구니 담기 중 오류가 발생했습니다');
+    }
   };
 
   const handleOpenCheckout = () => {
@@ -200,8 +257,8 @@ export default function MyPage() {
       return;
     }
 
-    if (cartItems.length === 0) {
-      alert('장바구니가 비었습니다');
+    if (selectedCartItems.length === 0) {
+      alert('구매할 상품을 선택해주세요');
       return;
     }
 
@@ -211,22 +268,35 @@ export default function MyPage() {
   const handlePaymentComplete = async (transferInfo: any) => {
     if (!user) return;
 
-    // 주문 생성
-    await createOrder(user.uid, cartItems, totalCartPrice, {
-      paymentMethod: 'transfer',
-      transferInfo,
-      status: 'pending'
-    });
+    const selectedItems = cartItems.filter(item => 
+      selectedCartItems.includes(item.productId)
+    );
+
+    // 주문 생성 - 배송지 정보 추가
+    await createOrder(
+      user.uid, 
+      selectedItems, 
+      selectedTotalPrice, 
+      {
+        paymentMethod: 'transfer',
+        transferInfo,
+        status: 'pending'
+      },
+      shippingInfo
+    );
     
-    // 장바구니 비우기
-    for (const item of cartItems) {
+    // 선택된 상품만 장바구니에서 제거
+    for (const item of selectedItems) {
       await removeFromCart(user.uid, item.productId);
     }
     
-    setCartItems([]);
+    setCartItems(prev => prev.filter(item => 
+      !selectedCartItems.includes(item.productId)
+    ));
+    setSelectedCartItems([]);
     setShowCheckoutModal(false);
     
-    alert(`입금 정보가 접수되었습니다!\n\n입금자명: ${transferInfo.depositorName}\n입금 금액: ${totalCartPrice.toLocaleString()}원\n\n입금 확인 후 주문이 처리됩니다.`);
+    alert(`입금 정보가 접수되었습니다!\n\n입금자명: ${transferInfo.depositorName}\n입금 금액: ${selectedTotalPrice.toLocaleString()}원\n\n입금 확인 후 주문이 처리됩니다.`);
     
     setOpenSection('orders');
   };
@@ -237,6 +307,33 @@ export default function MyPage() {
     
     await addPoints(user.uid, earnedPoints);
     setPoints(prev => prev + earnedPoints);
+  };
+
+  // 주문 취소 핸들러
+  const handleCancelOrder = async (orderId: string) => {
+    if (!user) return;
+    
+    await cancelOrder(user.uid, orderId);
+    
+    // 주문 목록 새로고침
+    const orderList = await getOrders(user.uid);
+    setOrders(orderList);
+  };
+
+  // 재구매 핸들러
+  const handleReorder = async (order: any) => {
+    if (!user) return;
+    
+    try {
+      for (const item of order.items) {
+        await addToCart(user.uid, item.productId, item.quantity);
+      }
+      alert('장바구니에 담았습니다!');
+      setOpenSection('cart');
+    } catch (error) {
+      console.error(error);
+      alert('장바구니 담기 중 오류가 발생했습니다');
+    }
   };
 
   if (loading) {
@@ -266,6 +363,10 @@ export default function MyPage() {
     );
   }
 
+  const selectedTotalPrice = cartItems
+    .filter(item => selectedCartItems.includes(item.productId))
+    .reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
+
   const totalCartPrice = cartItems.reduce(
     (sum, item) => sum + (item.product?.price || 0) * item.quantity,
     0
@@ -279,10 +380,21 @@ export default function MyPage() {
       <CheckoutModal
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
-        cartItems={cartItems}
-        totalPrice={totalCartPrice}
+        cartItems={cartItems.filter(item => selectedCartItems.includes(item.productId))}
+        totalPrice={selectedTotalPrice}
         shippingInfo={shippingInfo}
         onPaymentComplete={handlePaymentComplete}
+      />
+
+      <OrderDetailModal
+        isOpen={showOrderModal}
+        order={selectedOrder}
+        onClose={() => {
+          setShowOrderModal(false);
+          setSelectedOrder(null);
+        }}
+        onCancelOrder={handleCancelOrder}
+        onReorder={handleReorder}
       />
 
       {/* 프로필 카드 */}
@@ -455,11 +567,33 @@ export default function MyPage() {
             />
           ) : (
             <div className="space-y-5 pt-2">
+              {/* 전체 선택 */}
+              <div className="flex items-center justify-between pb-3 border-b">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedCartItems.length === cartItems.length}
+                    onChange={handleToggleAllCart}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm">전체선택 ({selectedCartItems.length}/{cartItems.length})</span>
+                </label>
+              </div>
+
               {cartItems.map((item) => (
                 <div
                   key={item.productId}
                   className="flex gap-4 pb-5 border-b last:border-0 last:pb-0"
                 >
+                  <label className="flex items-start pt-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCartItems.includes(item.productId)}
+                      onChange={() => handleToggleCartItem(item.productId)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                  </label>
+                  
                   <Link 
                     href={`/goods/${item.productId}`}
                     className="w-24 h-24 rounded-xl flex-shrink-0 overflow-hidden"
@@ -503,16 +637,17 @@ export default function MyPage() {
               
               <div className="pt-5">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-gray-600">총 상품 금액</span>
+                  <span className="text-sm text-gray-600">선택 상품 금액</span>
                   <span className="text-xl font-bold">
-                    {totalCartPrice.toLocaleString()}원
+                    {selectedTotalPrice.toLocaleString()}원
                   </span>
                 </div>
                 <button 
                   onClick={handleOpenCheckout}
-                  className="w-full py-4 bg-gray-900 text-white rounded-xl font-semibold"
+                  disabled={selectedCartItems.length === 0}
+                  className="w-full py-4 bg-gray-900 text-white rounded-xl font-semibold disabled:bg-gray-400"
                 >
-                  주문하기
+                  선택 상품 주문하기 ({selectedCartItems.length}개)
                 </button>
               </div>
             </div>
@@ -532,26 +667,53 @@ export default function MyPage() {
             />
           ) : (
             <div className="space-y-4 pt-2">
-              {orders.map((order) => (
-                <div key={order.id} className="border-b pb-4 last:border-0">
+            {orders.map((order) => (
+              <div key={order.id} className="border-b pb-4 last:border-0">
+                <button
+                  onClick={() => {
+                    setSelectedOrder(order);
+                    setShowOrderModal(true);
+                  }}
+                  className="w-full text-left mb-3"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <p className="text-xs text-gray-400">{order.orderNumber}</p>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      order.status === 'pending' 
-                        ? 'bg-yellow-50 text-yellow-700' 
-                        : 'bg-green-50 text-green-700'
-                    }`}>
-                      {order.status === 'pending' ? '결제 대기' : '완료'}
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        order.status === 'pending'
+                          ? 'bg-yellow-50 text-yellow-700'
+                          : order.status === 'canceled'
+                          ? 'bg-gray-100 text-gray-600'
+                          : 'bg-green-50 text-green-700'
+                      }`}
+                    >
+                      {order.status === 'pending' 
+                        ? '결제 대기' 
+                        : order.status === 'canceled'
+                        ? '취소됨'
+                        : '완료'}
                     </span>
                   </div>
+
                   <p className="text-base font-bold mb-1">
-                    {order.totalPrice?.toLocaleString()}원
+                    {order.totalPrice.toLocaleString()}원
                   </p>
                   <p className="text-xs text-gray-500">
-                    {order.items?.length || 0}개 상품
+                    {order.items.length}개 상품 · 상세 보기
                   </p>
-                </div>
-              ))}
+                </button>
+                
+                {/* 재구매 버튼 */}
+                {order.status !== 'canceled' && (
+                  <button
+                    onClick={() => handleReorder(order)}
+                    className="w-full py-3 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
+                  >
+                    재구매하기
+                  </button>
+                )}
+              </div>
+            ))}
             </div>
           )}
         </Accordion>
@@ -569,52 +731,67 @@ export default function MyPage() {
               subtext="마음에 드는 상품을 저장해보세요"
             />
           ) : (
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              {likedProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  href={`/goods/${product.id}`}
-                  className="block"
+            <div className="pt-2 space-y-4">
+              {/* 선택된 상품 장바구니 담기 */}
+              {selectedLikedProducts.length > 0 && (
+                <button
+                  onClick={handleAddSelectedLikesToCart}
+                  className="w-full py-3 bg-gray-900 text-white rounded-lg font-semibold"
                 >
-                  <div
-                    className="aspect-square rounded-xl mb-2 overflow-hidden"
-                    style={{ backgroundColor: product.bgColor }}
-                  >
-                    {product.image && (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
+                  선택 상품 장바구니 담기 ({selectedLikedProducts.length}개)
+                </button>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                {likedProducts.map((product) => (
+                  <div key={product.id} className="relative">
+                    {/* 체크박스 */}
+                    <label className="absolute top-2 left-2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedLikedProducts.includes(product.id)}
+                        onChange={() => handleToggleLikedProduct(product.id)}
+                        className="w-4 h-4 rounded border-gray-300"
                       />
-                    )}
+                    </label>
+
+                    <Link
+                      href={`/goods/${product.id}`}
+                      className="block"
+                    >
+                      <div
+                        className="aspect-square rounded-xl mb-2 overflow-hidden"
+                        style={{ backgroundColor: product.bgColor }}
+                      >
+                        {product.image && (
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            width={200}
+                            height={200}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <p className="text-xs truncate text-gray-600 mb-1">{product.name}</p>
+                      <p className="text-sm font-semibold">
+                        {product.price?.toLocaleString()}원
+                      </p>
+                    </Link>
                   </div>
-                  <p className="text-xs truncate text-gray-600 mb-1">{product.name}</p>
-                  <p className="text-sm font-semibold">
-                    {product.price?.toLocaleString()}원
-                  </p>
-                </Link>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </Accordion>
 
-        {/* 쿠폰/포인트 */}
+        {/* 포인트 */}
         <Accordion
-          title="쿠폰 / 포인트"
+          title="포인트"
           open={openSection === 'coupon'}
           onClick={() => setOpenSection(openSection === 'coupon' ? null : 'coupon')}
         >
           <div className="pt-2 space-y-4">
-            {/* 쿠폰 */}
-            <div>
-              <EmptyState 
-                text="보유 중인 쿠폰이 없습니다" 
-                subtext="이벤트에 참여해보세요"
-              />
-            </div>
-
             {/* 포인트 카드 */}
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -627,7 +804,7 @@ export default function MyPage() {
               <RewardAdButton onRewardEarned={handleRewardEarned} />
               
               <p className="text-xs text-gray-500 text-center mt-3">
-                광고 시청으로 포인트를 모아 구매 시 사용하세요
+                광고 시청으로 포인트를 모아<br />구매 시 사용하세요
               </p>
             </div>
           </div>

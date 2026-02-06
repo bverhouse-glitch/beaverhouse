@@ -8,7 +8,8 @@ import {
   getDocs, 
   deleteDoc,
   increment,
-  serverTimestamp 
+  serverTimestamp, 
+  updateDoc
 } from 'firebase/firestore';
 
 // 장바구니 추가
@@ -61,8 +62,27 @@ export async function getLikes(userId: string) {
   return snapshot.docs.map(doc => doc.id); // productId 배열 반환
 }
 
-// 주문 생성 시 items 배열에 상품 정보도 같이 저장
-export async function createOrder(userId: string, items: any[], totalPrice: number, p0: { paymentMethod: string; transferInfo: any; status: string; }) {
+//
+//
+// 주문
+// 주문 생성 시 items 배열에 상품 정보 + 배송지 정보도 같이 저장
+export async function createOrder(
+  userId: string, 
+  items: any[], 
+  totalPrice: number, 
+  paymentInfo: { 
+    paymentMethod: string; 
+    transferInfo: any; 
+    status: string; 
+  },
+  shippingInfo: {
+    name: string;
+    phone: string;
+    zipcode: string;
+    address: string;
+    addressDetail: string;
+  }
+) {
   const ordersRef = collection(db, 'users', userId, 'orders');
   const orderDoc = doc(ordersRef);
   
@@ -74,9 +94,19 @@ export async function createOrder(userId: string, items: any[], totalPrice: numb
       price: item.product?.price,
       quantity: item.quantity,
       image: item.product?.image,
+      bgColor: item.product?.bgColor,
     })),
     totalPrice,
-    status: 'pending',
+    status: paymentInfo.status,
+    paymentMethod: paymentInfo.paymentMethod,
+    transferInfo: paymentInfo.transferInfo,
+    shippingInfo: {
+      name: shippingInfo.name,
+      phone: shippingInfo.phone,
+      zipcode: shippingInfo.zipcode,
+      address: shippingInfo.address,
+      addressDetail: shippingInfo.addressDetail,
+    },
     createdAt: serverTimestamp()
   });
   
@@ -91,6 +121,15 @@ export async function getOrders(userId: string) {
     id: doc.id,
     ...doc.data()
   }));
+}
+
+// 주문 취소
+export async function cancelOrder(userId: string, orderId: string) {
+  const orderRef = doc(db, 'users', userId, 'orders', orderId);
+  await updateDoc(orderRef, {
+    status: 'canceled',
+    canceledAt: new Date().toISOString(),
+  });
 }
 
 //

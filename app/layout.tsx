@@ -17,18 +17,19 @@ export const metadata: Metadata = {
   title: '비버하우스 - Beaver House',
   description: '비버하우스 공식 스토어 - 쉼 없이 오늘을 살아가는 비버들의 이야기',
   manifest: '/manifest.webmanifest',
-  themeColor: '#000000',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black',
     title: '비버하우스',
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
+  }
 };
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#ffffff'
+}
 
 export default function RootLayout({
   children,

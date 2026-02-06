@@ -1,17 +1,41 @@
+// app/goods/[id]/ProductDetail.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { addToCart } from '@/lib/firestore';
+import { addToCart, toggleLike, getLikes } from '@/lib/firestore';
 
 export default function ProductDetail({ product }: { product: any }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesLoading, setLikesLoading] = useState(true);
+
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLikesLoading(false);
+        return;
+      }
+
+      try {
+        const likes = await getLikes(user.uid);
+        setIsLiked(likes.includes(product.id));
+      } catch (error) {
+        console.error('Failed to load like status:', error);
+      } finally {
+        setLikesLoading(false);
+      }
+    };
+
+    checkLikeStatus();
+  }, [product.id]);
 
   const handleAddToCart = async () => {
     const user = auth.currentUser;
@@ -32,6 +56,23 @@ export default function ProductDetail({ product }: { product: any }) {
       console.error(error);
     } finally {
       setAdding(false);
+    }
+  };
+
+  const handleToggleLike = async () => {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    try {
+      await toggleLike(user.uid, product.id);
+      setIsLiked(!isLiked);
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      alert('오류가 발생했습니다');
     }
   };
 
@@ -119,6 +160,23 @@ export default function ProductDetail({ product }: { product: any }) {
                 <span className="text-gray-300 text-8xl">📦</span>
               </div>
             )}
+            
+            {/* 찜하기 버튼 */}
+            <button
+              onClick={handleToggleLike}
+              disabled={likesLoading}
+              className="absolute top-4 right-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all"
+            >
+              {isLiked ? (
+                <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              )}
+            </button>
           </div>
 
           <div className="px-4 py-6">
