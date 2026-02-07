@@ -61,7 +61,7 @@ export default function GameHub() {
           <div className="flex items-start gap-3">
             {/* 좌측: 프로필 */}
             <div className="flex-shrink-0">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-stone-300">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-stone-300">
                 <Image 
                   src="/bver.png" 
                   alt="비버"
@@ -70,8 +70,7 @@ export default function GameHub() {
                 />
               </div>
               <div className="text-center mt-1">
-                <div className="text-xs font-bold text-stone-700">비버</div>
-                <div className="text-xs text-stone-500">Lv.{gameData.stats.level}</div>
+                <div className="text-xs font-bold text-stone-700">비버 Lv.{gameData.stats.level}</div>
               </div>
             </div>
 
@@ -117,9 +116,8 @@ export default function GameHub() {
             {/* 우측: 포인트 */}
             <div className="flex-shrink-0">
               <div className="bg-amber-100 rounded-lg px-3 py-2 text-center min-w-[70px]">
-                <div className="text-xs text-amber-700 font-medium">포인트</div>
                 <div className="text-lg font-bold text-amber-900">
-                  {gameData.stats.points.toLocaleString()}
+                  {gameData.stats.points.toLocaleString()}p
                 </div>
               </div>
               <div className="text-xs text-center text-stone-500 mt-2">
@@ -151,7 +149,7 @@ export default function GameHub() {
 
           {/* 탭 컨텐츠 */}
           {currentTab === 'main' && (
-            <div className="fixed left-0 right-0 bottom-[60px] md:bottom-[48px] z-20 px-4 pb-3 bg-stone-100">
+            <div className="fixed left-0 right-0 bottom-[80px] md:bottom-[48px] z-20 px-4 pb-3 bg-stone-100">
               <div className="text-xs text-stone-500 text-center mb-3">
                 마지막 대화: {formatLastChat(gameData.chatHistory.lastChatTime)}
               </div>
@@ -252,7 +250,7 @@ export default function GameHub() {
                 : 'bg-white text-stone-500'
             }`}
           >
-            <div className="text-xs">홈</div>
+            <div className="text-xs">메인</div>
           </button>
           <button
             onClick={() => setCurrentTab('missions')}
