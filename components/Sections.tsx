@@ -8,7 +8,6 @@ import 'swiper/css/pagination';
 import { popupStores, allProducts } from '../lib/data';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getActiveEvents } from '@/lib/notion';
 
 interface HomeSectionProps {
   visibleSections: Set<string>;
@@ -30,10 +29,10 @@ const defaultEvents = [
 
 export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) {
   const [products, setProducts] = useState(allProducts);
-  const [popups] = useState(popupStores);
-  const [events, setEvents] = useState(defaultEvents); // ⭐ 추가
+  const [popups, setPopups ] = useState(popupStores);
+  const [events, setEvents] = useState(defaultEvents); 
 
-  // 컴포넌트 마운트되면 Notion 데이터 가져오기
+  // 상품 데이터 가져오기
   useEffect(() => {
     fetch('/api/products')
       .then(res => res.json())
@@ -48,7 +47,18 @@ export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) 
       });
   }, []);
 
-  // 팝업 데이터 가져오기 ⭐ 이거 그대로 복사
+  // 팝업 데이터 가져오기
+  useEffect(() => {
+    fetch('/api/popups')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setPopups(data);
+        }
+      })
+  }, []);
+
+  // 이벤트 데이터 가져오기
   useEffect(() => {
     fetch('/api/events/active')
       .then(res => res.json())
@@ -62,39 +72,39 @@ export function HomeSection({ visibleSections, sectionRefs }: HomeSectionProps) 
 
   return (
     <>
-      {/* 메인 배너 */}
-      <section className="overflow-hidden">
-        <div className="max-w-3xl mx-auto">
-          <Swiper
-            modules={[Autoplay, Pagination]}
-            slidesPerView={1}
-            loop
-            speed={700}
-            autoplay={{ delay: 3000, disableOnInteraction: false }}
-            pagination={{ clickable: true }}
-            className="hero-swiper"
-          >
-            {[
-              { id: 1, src: '/poster-1.png', title: 'GAME OVER?' },
-              { id: 2, src: '/poster-2.png', title: 'BEAVER ESCAPE' },
-            ].map((poster) => (
-              <SwiperSlide key={poster.id}>
-                <div className="relative h-80 md:h-96 overflow-hidden">
-                  {/* 이미지 */}
-                  <img
-                    src={poster.src}
-                    alt={poster.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-
-                  {/* 오버레이 */}
-                  <div className="absolute inset-0 bg-black/30" />
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      </section>
+      {/* 메인 배너 (이벤트 기반 히어로) */}
+      {events.length > 0 && (
+        <section className="overflow-hidden">
+          <div className="max-w-3xl mx-auto">
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              slidesPerView={1}
+              loop
+              speed={700}
+              autoplay={{ delay: 3000, disableOnInteraction: false }}
+              pagination={{ clickable: true }}
+              className="hero-swiper"
+            >
+              {events.map((event) => (
+                <SwiperSlide key={event.id}>
+                  <Link href={event.linkUrl || `/events/${event.id}`}>
+                    <div className="relative h-80 md:h-96 overflow-hidden cursor-pointer">
+                      {/* 이미지 */}
+                      {event.image && (
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                  </Link>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </section>
+      )}
 
       {/* 무한 스크롤 텍스트 */}
       <section className="bg-white text-black py-2 mb-6 md:mb-8 max-w-3xl mx-auto overflow-hidden whitespace-nowrap border-y border-gray-200">
