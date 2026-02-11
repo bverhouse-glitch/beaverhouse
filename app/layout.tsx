@@ -32,13 +32,27 @@ export const viewport = {
   themeColor: '#ffffff'
 }
 
+import { Black_Han_Sans, Nanum_Gothic } from 'next/font/google';
+
+const blackHanSans = Black_Han_Sans({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-black-han-sans',
+});
+
+const nanumGothic = Nanum_Gothic({
+  weight: ['400', '700', '800'],
+  subsets: ['latin'],
+  variable: '--font-nanum-gothic',
+});
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={`${blackHanSans.variable} ${nanumGothic.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/icon-192.png" />

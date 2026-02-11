@@ -331,10 +331,6 @@ export default function BeaverHousePopupPage() {
 // 글로벌 CSS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const GLOBAL_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Gothic:wght@400;700;800&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --ink: #1E1C18;
     --ink-10: rgba(30,28,24,0.08);

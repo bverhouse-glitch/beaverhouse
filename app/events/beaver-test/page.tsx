@@ -181,10 +181,6 @@ const VERSION_ICONS: Record<string, string> = {
 
 // ─── 공통 CSS ───
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Gothic:wght@400;700;800&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --ink: #1E1C18;
     --cream: #FAFAF8;
