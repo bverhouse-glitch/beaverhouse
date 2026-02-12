@@ -133,7 +133,7 @@ export default function GameHub() {
             <div>
               <div className="text-[13px] font-bold text-[#e8f0ff] tracking-wide">비버</div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] text-[#4fd1ff] tracking-widest font-medium">RANK.3</span>
+                <span className="text-[9px] text-[#4fd1ff] tracking-widest font-medium">RANK.1</span>
                 <div className="w-14 h-1 bg-white/10 rounded-full overflow-hidden">
                   <div className="h-full w-[46%] bg-gradient-to-r from-[#2a6fff] to-[#4fd1ff] rounded-full"/>
                 </div>
@@ -151,7 +151,7 @@ export default function GameHub() {
               </div>
               <div className="flex items-center gap-1 bg-[#080c1c]/75 border border-white/10 rounded-full px-2.5 py-1 backdrop-blur-sm">
                 <span className="text-xs">💎</span>
-                <span className="text-[11px] font-bold text-[#e8f4ff]">233</span>
+                <span className="text-[11px] font-bold text-[#e8f4ff]">0</span>
                 <span className="text-[10px] text-[#4fd1ff]">+</span>
               </div>
             </div>
@@ -167,15 +167,15 @@ export default function GameHub() {
       <div className="absolute right-4 top-1/2 -translate-y-1/2 z-25 flex flex-col gap-2">
         {([
           { key: 'missions',    icon: '📋', label: '미션',  badge: unclaimedCount },
-          { key: 'stats',       icon: '💝', label: '현 상태', badge: 0 },
+          { key: 'stats',       icon: '💝', label: '통계', badge: 0 },
           { key: 'settings',    icon: '⚙️', label: '설정',  badge: 0 },
-        ] as { key: SideMenu; icon: string; label: string; badge: number }[]).map((item) => {
+        ] as const).map((item) => {
           const isHighlight = item.key === 'missions' && unclaimedCount > 0;
 
           return (
             <button
               key={item.label}
-              onClick={() => item.key && toggleMenu(item.key)}
+              onClick={() => item.key && toggleMenu(item.key as SideMenu)}
               className={[
                 'relative w-13 flex flex-col items-center gap-1 rounded-xl px-1.5 py-2 backdrop-blur-md transition-all active:scale-95',
                 'border bg-[rgba(8,12,28,0.82)]',
@@ -276,36 +276,6 @@ export default function GameHub() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {activeMenu === 'settings' && (
-        <div className="absolute right-[68px] top-1/2 -translate-y-1/2 z-24 w-52 bg-[rgba(8,12,28,0.92)] border border-[rgba(79,209,255,0.25)] rounded-xl p-3 backdrop-blur-xl shadow-xl">
-          <div className="text-[9px] tracking-[2.5px] text-[#4fd1ff]/50 uppercase mb-2 pb-2 border-b border-[#4fd1ff]/12">— SETTINGS —</div>
-          <div className="space-y-1.5">
-            {[
-              { icon: '🔔', label: '알림 설정', },
-              { icon: '🎨', label: '테마 설정', },
-              { icon: '🔊', label: '사운드', },
-              { icon: '👤', label: '프로필 편집', },
-              { icon: '🔒', label: '개인정보', },
-              { icon: '📱', label: '연동 계정', },
-              { icon: '❓', label: '도움말', },
-              { icon: '📧', label: '문의하기', },
-            ].map(item => (
-              <button
-                key={item.label}
-                disabled
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] text-left opacity-50 cursor-not-allowed"
-              >
-                <span className="text-base">{item.icon}</span>
-                <span className="text-[10px] text-[rgba(220,230,255,0.6)]">{item.label}</span>
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 pt-2 border-t border-[#4fd1ff]/10 text-center">
-            <span className="text-[9px] text-white/20">v1.0.0</span>
           </div>
         </div>
       )}

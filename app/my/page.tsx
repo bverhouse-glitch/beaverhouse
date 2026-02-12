@@ -456,6 +456,13 @@ export default function MyPage() {
             onRewardEarned={handleRewardEarned}
           />
         </Accordion>
+        
+        <Link href="/game">
+          <div className="flex items-center justify-between p-4 py-10 rounded-lg">
+            <span>비버 게임</span>
+            <span>→</span>
+          </div>
+        </Link>
 
         <button
           onClick={handleLogout}

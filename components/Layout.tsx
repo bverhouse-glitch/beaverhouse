@@ -170,7 +170,7 @@ export function Footer() {
         </div>
 
         {/* 저작권 */}
-        <p className="text-xs text-gray-500 pt-4">
+        <p className="text-xs text-gray-500">
           © 2026 BEAVER HOUSE. All rights reserved.
         </p>
       </div>

@@ -22,7 +22,7 @@ export default function AppLayout({
     <>
       <Header />
 
-      <main className="pt-14 md:pt-16 pb-14 md:pb-0">
+      <main className="pt-14 md:pt-16 pb-10 md:pb-0">
         {children}
       </main>
 
