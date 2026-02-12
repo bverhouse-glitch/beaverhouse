@@ -1,6 +1,6 @@
+// app/game/types.ts
 import { ReactNode } from "react";
 
-// app/game/types.ts
 export type StatType = 'affection' | 'empathy' | 'rebellion';
 
 export interface Choice {
@@ -62,12 +62,12 @@ export interface Mission {
 }
 
 export interface ChatHistory {
-  maxLoginStreak: ReactNode;
   lastChatTime: string;
   todayChats: number;
   totalChats: number;
   loginStreak: number;
   lastLoginDate: string;
+  maxLoginStreak: number;  // ← ReactNode에서 number로 수정
 }
 
 export interface GameData {
