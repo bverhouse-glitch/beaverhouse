@@ -38,7 +38,7 @@ export async function initializeGameData(userId: string): Promise<GameData> {
       totalChats: 0,
       loginStreak: 1,
       lastLoginDate: new Date().toISOString().split('T')[0],
-      maxLoginStreak: undefined
+      maxLoginStreak: 1  // ← undefined에서 1로 수정
     },
     achievements: [],
     lastUpdated: new Date().toISOString(),
