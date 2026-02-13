@@ -9,7 +9,7 @@ import { useGameData } from './hooks/useGameData';
 type SideMenu = 'missions' | 'stats' | 'settings' | null;
 
 const BG_OPTIONS = [
-  { id: 'room', label: '방', path: '/game/bg-room.jpg' },
+  { id: 'room', label: '방', path: '/game/bg-room2.jpg' },
   { id: 'office', label: '오피스', path: '/game/bg-office.jpg' },
   { id: 'afternoon', label: '노을시티', path: '/game/bg-city-afternoon.jpg' },
   { id: 'night', label: '밤시티', path: '/game/bg-city-night.jpg' },
@@ -70,7 +70,7 @@ export default function GameHub() {
       let bgId = 'night';
       
       if (hour >= 5 && hour < 9) {
-        bg = '/game/bg-room.jpg';
+        bg = '/game/bg-room2.jpg';
         bgId = 'room';
       } else if (hour >= 9 && hour < 15) {
         bg = '/game/bg-office.jpg';
