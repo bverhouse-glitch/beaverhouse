@@ -14,11 +14,12 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
-    { text: 'HOME', href: '/', delay: 0 },
-    { text: 'SHOP', href: '/goods', delay: 100 },
-    { text: 'EVENTS', href: '/events', delay: 200 },
+    { text: 'SHOP', href: '/goods', delay: 0 },
+    { text: 'EVENTS', href: '/events', delay: 100 },
+    { text: 'NOTICE', href: '/notice', delay: 200 },
     { text: 'POPUP STORE', href: '/popup', delay: 300 },
-    { text: 'MY BEAVER', href: '/my', delay: 400},
+    { text: 'SUPPORT', href: '/support', delay: 400},
+    { text: 'MY BEAVER', href: '/my', delay: 500},
   ];
 
   return (
@@ -159,19 +160,22 @@ export function Footer() {
           </a>
         </div>
 
-        {/* 약관 */}
+        {/* 약관 - 여기 수정! */}
         <div className="flex gap-4 text-xs text-gray-400">
-          <button className="hover:text-white transition-colors">
+          <Link href="/terms" className="hover:text-white transition-colors">
             이용약관
-          </button>
-          <button className="font-semibold text-white">
+          </Link>
+          <Link href="/privacy" className="font-semibold text-white hover:text-gray-200 transition-colors">
             개인정보처리방침
-          </button>
+          </Link>
+          <Link href="/refund" className="hover:text-white transition-colors">
+            환불정책
+          </Link>
         </div>
 
         {/* 저작권 */}
         <p className="text-xs text-gray-500">
-          © 2026 BEAVER HOUSE. All rights reserved.
+          © 2025 BEAVER HOUSE. All rights reserved.
         </p>
       </div>
     </footer>
