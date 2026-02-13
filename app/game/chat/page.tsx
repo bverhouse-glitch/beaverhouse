@@ -523,7 +523,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-2">
             <div className="relative w-10 h-10">
               <Image
-                src="/bver.png"
+                src="/game/bver-profile.png"
                 alt="비버"
                 fill
                 className="rounded-full object-cover"

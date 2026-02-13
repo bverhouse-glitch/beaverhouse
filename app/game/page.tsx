@@ -9,10 +9,10 @@ import { useGameData } from './hooks/useGameData';
 type SideMenu = 'missions' | 'stats' | 'settings' | null;
 
 const BG_OPTIONS = [
-  { id: 'room', label: '방', path: '/game/bg-room2.jpg' },
-  { id: 'office', label: '오피스', path: '/game/bg-office.jpg' },
-  { id: 'afternoon', label: '노을시티', path: '/game/bg-city-afternoon.jpg' },
-  { id: 'night', label: '밤시티', path: '/game/bg-city-night.jpg' },
+  { id: 'room', label: '방', path: '/game/bg-room.jpg' },
+  { id: 'office-day', label: '오피스-낮', path: '/game/bg-office-day.jpg' },
+  { id: 'office-afternoon', label: '오피스-오후', path: '/game/bg-office-afternoon.jpg' },
+  { id: 'night', label: '퇴근길', path: '/game/bg-city-night.jpg' },
 ];
 
 // 배경별 대사
@@ -22,14 +22,14 @@ const BG_DIALOGUES: Record<string, string[]> = {
     '침대가 최고야...\n나가기 싫다',
     '혼자만의 시간이\n필요해',
   ],
-  office: [
+  'office-day': [
     '회사 일이\n산더미야...',
     '오늘도 야근\n각인가 봐',
     '커피 한 잔\n마셔야겠어',
   ],
-  afternoon: [
+  'office-afternoon': [
     '퇴근 시간이\n다가온다',
-    '노을이\n예쁘네',
+    '노을이 예쁘네...\n집에 가고 싶다.',
     '오늘 하루도\n고생했어',
   ],
   night: [
@@ -70,13 +70,13 @@ export default function GameHub() {
       let bgId = 'night';
       
       if (hour >= 5 && hour < 9) {
-        bg = '/game/bg-room2.jpg';
+        bg = '/game/bg-room.jpg';
         bgId = 'room';
       } else if (hour >= 9 && hour < 15) {
-        bg = '/game/bg-office.jpg';
+        bg = '/game/bg-office-day.jpg';
         bgId = 'office';
       } else if (hour >= 15 && hour < 19) {
-        bg = '/game/bg-city-afternoon.jpg';
+        bg = '/game/bg-office-afternoon.jpg';
         bgId = 'afternoon';
       } else {
         bg = '/game/bg-city-night.jpg';
@@ -101,14 +101,14 @@ export default function GameHub() {
       let actualBgId = 'night';
       
       if (hour >= 5 && hour < 9) {
-        bg = '/game/bg-room2.jpg';
+        bg = '/game/bg-room.jpg';
         actualBgId = 'room';
       } else if (hour >= 9 && hour < 15) {
-        bg = '/game/bg-office.jpg';
-        actualBgId = 'office';
+        bg = '/game/bg-office-day.jpg';
+        actualBgId = 'office-day';
       } else if (hour >= 15 && hour < 19) {
-        bg = '/game/bg-city-afternoon.jpg';
-        actualBgId = 'afternoon';
+        bg = '/game/bg-office-afternoon.jpg';
+        actualBgId = 'office-afternoon';
       } else {
         bg = '/game/bg-city-night.jpg';
         actualBgId = 'night';
@@ -373,7 +373,10 @@ export default function GameHub() {
               
               {/* 자동 옵션 */}
               <button
-                onClick={() => handleBgChange('auto')}
+                onClick={() => {
+                  handleBgChange('auto');
+                  setActiveMenu(null);
+                }}
                 className={[
                   'w-full text-left px-3 py-2 rounded-lg text-[10px] transition-all',
                   selectedBgId === 'auto'
@@ -391,7 +394,10 @@ export default function GameHub() {
               {BG_OPTIONS.map(bg => (
                 <button
                   key={bg.id}
-                  onClick={() => handleBgChange(bg.id)}
+                  onClick={() => {
+                    handleBgChange(bg.id);
+                    setActiveMenu(null);
+                  }}
                   className={[
                     'w-full text-left px-3 py-2 rounded-lg text-[10px] transition-all',
                     selectedBgId === bg.id
@@ -410,7 +416,7 @@ export default function GameHub() {
         )}
 
         {/* ══ 캐릭터 + 말풍선 그룹 (중앙 정렬, bottom에서 200px) ══ */}
-        <div className="absolute bottom-[150px] left-1/2 -translate-x-1/2 z-15 flex flex-col items-center">
+        <div className="absolute bottom-[200px] left-1/2 -translate-x-1/2 z-15 flex flex-col items-center">
           
           {/* 말풍선 */}
           <div className="relative mb-4 w-56 bg-[rgba(6,9,18,0.88)] border border-[#4fd1ff]/30 rounded-xl px-4 py-3 backdrop-blur-xl shadow-lg game-speech-glow">
@@ -426,7 +432,7 @@ export default function GameHub() {
           {/* 비버 캐릭터 */}
           <div className="relative w-[280px] h-[280px]">
             <Image
-              src="/bver.png"
+              src={currentBgId.startsWith('office') ? '/game/bver-office.png' : '/bver.png'}
               alt="비버"
               fill
               className="object-contain drop-shadow-[0_30px_60px_rgba(79,209,255,0.2)]"
